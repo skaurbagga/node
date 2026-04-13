@@ -1,83 +1,91 @@
 const express = require('express');
-const connectDB = require('./db');
-const User = require('./models/User');
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
+const cors = require('cors');
+
+dotenv.config();
 
 const app = express();
-
-// Middleware
 app.use(express.json());
+app.use(cors());
 
-// Connect Database
-connectDB();
+// Import files
+const User = require('./models/User');
+const auth = require('./middleware/auth');
 
-// Test Route
-app.get('/', (req, res) => {
-    res.send("Server Running");
-});
+// Connect MongoDB
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB Connected"))
+  .catch(err => console.log(err));
 
-
-// ✅ REGISTER ROUTE (Password gets hashed automatically)
+/* =========================
+   1. REGISTER ROUTE
+========================= */
 app.post('/register', async (req, res) => {
-    try {
-        console.log("BODY:", req.body);
+  try {
+    console.log("Request Body:", req.body); // DEBUG
 
-        const { username, email, password } = req.body;
+    const { username, email, password } = req.body;
 
-        if (!username || !email || !password) {
-            return res.status(400).json({ message: "All fields are required" });
-        }
+    let user = await User.findOne({ email });
+    if (user) return res.status(400).json({ msg: "User already exists" });
 
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ message: "User already exists" });
-        }
+    user = new User({ username, email, password });
+    await user.save();
 
-        const user = new User({ username, email, password });
+    res.json({ msg: "User registered successfully" });
 
-        await user.save();
-
-        res.status(201).json({ message: "User registered successfully" });
-
-    } catch (error) {
-        console.error("REGISTER ERROR:", error);
-        res.status(500).json({ error: error.message });
-    }
+  } catch (err) {
+    console.error("REGISTER ERROR:", err.message); // IMPORTANT
+    res.status(500).send(err.message);
+  }
 });
-
-
-/*// ✅ LOGIN ROUTE (Password comparison)
+/* =========================
+   2. LOGIN ROUTE (GET JWT)
+========================= */
 app.post('/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(400).json({ message: "Invalid credentials" });
-        }
+    // 1. Check user
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ msg: "User does not exist" });
 
-        // Compare passwords
-        const isMatch = await user.comparePassword(password);
+    // 2. Compare password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ msg: "Invalid credentials" });
 
-        if (!isMatch) {
-            return res.status(400).json({ message: "Invalid credentials" });
-        }
+    // 3. Create JWT
+    const payload = {
+      id: user._id
+    };
 
-        res.json({
-            message: "Login successful"
-        });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: '1h'
+    });
 
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});*/
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        username: user.username
+      }
+    });
 
-require('dotenv').config();
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-
-
-// Start Server
-const PORT = 5000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  } catch (err) {
+    res.status(500).send("Server Error");
+  }
 });
+
+/* =========================
+   3. PROTECTED ROUTE
+========================= */
+app.get('/dashboard', auth, (req, res) => {
+  res.send("Welcome to the Private Dashboard");
+});
+
+// Start server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
