@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Room Chat</title>
+</head>
+<body>
+
+<h2>Room Chat</h2>
+
+<input id="room" placeholder="Enter Room ID">
+<button onclick="joinRoom()">Join Room</button>
+
+<br><br>
+
+<input id="msg" placeholder="Enter message">
+<button onclick="sendMessage()">Send</button>
+
+<ul id="messages"></ul>
+
+<!--<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+<script>
+    const socket = io("http://localhost:5000");
+
+    let currentRoom = "";
+
+    function joinRoom() {
+        currentRoom = document.getElementById("room").value;
+        socket.emit("join_activity", currentRoom);
+        alert("Joined room: " + currentRoom);
+    }
+
+    function sendMessage() {
+        const msg = document.getElementById("msg").value;
+
+        socket.emit("send_activity_chat", {
+            activityId: currentRoom,
+            message: msg
+        });
+    }
+
+    socket.on("new_chat", (data) => {
+        const li = document.createElement("li");
+        li.innerText = data;
+        document.getElementById("messages").appendChild(li);
+    });
+</script> -->
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+<script>
+    const token ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNjlkZmMwYzE5ZmUxY2I5NGYxMDgxODY4In0sImlhdCI6MTc3NjI3MTU3NywiZXhwIjoxNzc2Mjc1MTc3fQ.KtVags9t18yeOEngHQRQZedMXSzDeyimV-TISWdeCDg"; // 🔥 from login
+
+    const socket = io("http://localhost:5000", {
+        auth: {
+            token: token
+        }
+    });
+</script>
+
+</body>
+</html>
