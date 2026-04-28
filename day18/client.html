@@ -1,0 +1,107 @@
+<!--<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Chat</title>
+</head>
+<body>
+
+<h2>Real-Time Chat</h2>
+
+<input id="msg" placeholder="Enter message" />
+<button onclick="sendMessage()">Send</button>
+
+<ul id="messages"></ul>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+    const socket = io();
+
+    const messages = document.getElementById('messages');
+
+    // Receive messages from server
+    socket.on('message', (msg) => {
+        const li = document.createElement('li');
+        li.textContent = msg;
+        messages.appendChild(li);
+    });
+
+    // Send message to server
+    function sendMessage() {
+        const input = document.getElementById('msg');
+        socket.emit('sendMessage', input.value);
+        input.value = '';
+    }
+</script>
+
+</body>
+</html>-->
+
+<!--<!DOCTYPE html>
+<html>
+<head>
+    <title>Activity Join</title>
+</head>
+<body>
+
+<h2>Join Activity</h2>
+
+<input id="activity" placeholder="Enter activity name" />
+<button onclick="join()">Join</button>
+
+<ul id="messages"></ul>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+    const socket = io();
+    const messages = document.getElementById('messages');
+
+    function join() {
+        const activityName = document.getElementById('activity').value;
+
+        socket.emit('join_activity', { activityName });
+    }
+
+    socket.on('new_participant', (data) => {
+        const li = document.createElement('li');
+        li.textContent = data.message;
+        messages.appendChild(li);
+    });
+</script>
+
+</body>
+</html>-->
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Event Rooms</title>
+</head>
+<body>
+
+<h2>Join Event Room</h2>
+
+<input id="eventId" placeholder="Enter Event ID (e.g., chess)" />
+<button onclick="joinRoom()">Join Event</button>
+
+<ul id="messages"></ul>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+    const socket = io();
+    const messages = document.getElementById('messages');
+
+    function joinRoom() {
+        const eventId = document.getElementById('eventId').value;
+        socket.emit('subscribe_to_event', eventId);
+    }
+
+    socket.on('notification', (msg) => {
+        const li = document.createElement('li');
+        li.textContent = msg;
+        messages.appendChild(li);
+    });
+</script>
+
+</body>
+</html>
