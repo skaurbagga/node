@@ -1,14 +1,3 @@
-/*const express=require('express');
-const app=express();
-
-app.get('/',(req,res)=>{
-    res.send("Server running");
-});
-
-app.listen(3000,()=>{
-    console.log('Server started on port 3000');
-});*/
-
 const express = require('express');
 const app = express();
 
@@ -24,6 +13,10 @@ const users = [
     { id: 2, name: "Bob", status: "Away" },
     { id: 3, name: "Charlie", status: "Offline" }
 ];
+
+app.get('/', (req, res) => {
+    res.send('This is the home page');
+});
 
 app.get('/about', (req, res) => {
     res.send('This is the About API — Backend logic is active.');
